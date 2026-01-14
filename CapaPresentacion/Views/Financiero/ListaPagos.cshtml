@@ -1,0 +1,105 @@
+﻿@model List<CapaModelo.Pago>
+
+@{
+    ViewBag.Title = "Validación de Pagos";
+    Layout = "~/Views/Shared/_LayoutAOCR.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-money-bill-wave mr-2"></i> Listado de Pagos por Validar</h4>
+        </div>
+        <div class="card-body">
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">@TempData["Error"]</div>
+            }
+            @if (TempData["Exito"] != null)
+            {
+                <div class="alert alert-success">@TempData["Exito"]</div>
+            }
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>ID Pago</th>
+                            <th>Solicitud</th>
+                            <th>Monto</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                            <th>Comprobante</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.CodigoPago</td>
+                                    <td>@item.CodigoSolicitud</td>
+                                    <td>$ @item.Monto.ToString("N2")</td>
+                                    <td>@(item.FechaPago.HasValue ? item.FechaPago.Value.ToString("dd/MM/yyyy") : "--")</td>
+                                    <td>
+                                        <span class="badge badge-warning">@item.Estado</span>
+                                    </td>
+                                    <td>@item.NumeroTransaccion</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-success" onclick="procesarAccion(@item.CodigoPago, 'APROBAR')">
+                                            <i class="fas fa-check"></i> Validar
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="procesarAccion(@item.CodigoPago, 'RECHAZAR')">
+                                            <i class="fas fa-times"></i> Rechazar
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">
+                                    No hay pagos pendientes de validación.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="formAccion" method="post" style="display:none;">
+    <input type="hidden" name="idPago" id="input_idPago" />
+    <input type="hidden" name="id" id="input_id" />
+    <input type="hidden" name="observaciones" id="input_observaciones" />
+</form>
+
+<script>
+    function procesarAccion(id, tipo) {
+        var form = document.getElementById('formAccion');
+
+        if (tipo === 'APROBAR') {
+            if (confirm('¿Está seguro de VALIDAR este pago?')) {
+                form.action = '@Url.Action("AprobarPago", "Financiero")';
+                document.getElementById('input_idPago').value = id;
+                document.getElementById('input_observaciones').value = 'Validado manualmente';
+                form.submit();
+            }
+        }
+        else if (tipo === 'RECHAZAR') {
+            var motivo = prompt("Ingrese el motivo del rechazo:");
+            if (motivo != null && motivo.trim() !== "") {
+                form.action = '@Url.Action("RechazarPago", "Financiero")';
+                document.getElementById('input_id').value = id;
+                document.getElementById('input_observaciones').value = motivo;
+                form.submit();
+            }
+        }
+    }
+</script>

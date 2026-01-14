@@ -1,0 +1,54 @@
+﻿@model List<CapaModelo.SolicitudAOCR>
+
+@{
+    ViewBag.Title = "Dashboard Financiero";
+}
+
+<h2>Financiero – Solicitudes Pendientes de Revisión</h2>
+<hr />
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Operador</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            int i = 1;
+            foreach (var sol in Model)
+            {
+        <tr>
+            <td>@i</td>
+            <td>@sol.NombreOperador</td>
+            <td>@sol.FechaRegistro?.ToString("dd/MM/yyyy")</td>
+
+            <td>@sol.Estado</td>
+            <td>
+                <a href="@Url.Action("RevisarSolicitud", "Financiero", new { id = sol.CodigoSolicitud })"
+                   class="btn btn-sm btn-primary">Revisar</a>
+            </td>
+        </tr>
+                i++;
+            }
+        }
+        else
+        {
+            <tr><td colspan="5" class="text-center">No hay solicitudes pendientes.</td></tr>
+        }
+    </tbody>
+</table>

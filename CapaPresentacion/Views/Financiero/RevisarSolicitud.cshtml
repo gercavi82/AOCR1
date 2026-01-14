@@ -1,0 +1,60 @@
+﻿@model CapaModelo.SolicitudAOCR
+
+@{
+    ViewBag.Title = "Revisión de Solicitud Financiera";
+}
+
+<h2>Revisar Solicitud #@Model.CodigoSolicitud</h2>
+<hr />
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Warning"] != null)
+{
+    <div class="alert alert-warning">@TempData["Warning"]</div>
+}
+
+<div class="panel panel-info">
+    <div class="panel-heading"><strong>Datos Generales</strong></div>
+    <div class="panel-body">
+        <p><strong>Operador: </strong>@Model.NombreOperador</p>
+        <p><strong>Fecha Registro: </strong>@Model.FechaRegistro?.ToString("dd/MM/yyyy")</p>
+
+        <p><strong>Estado:</strong> @Model.Estado</p>
+    </div>
+</div>
+
+<h4>Pagos asociados</h4>
+@if (ViewBag.Pagos != null)
+{
+    var pagos = (List<CapaModelo.Pago>)ViewBag.Pagos;
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Monto</th>
+                <th>Metodo</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in pagos)
+            {
+                <tr>
+                    <td>$@p.Monto.ToString("N2")</td>
+                    <td>@p.MetodoPago</td>
+                    <td>@p.Estado</td>
+                    <td>
+                        @if (p.Estado == "PENDIENTE")
+                        {
+                            <a href="@Url.Action("ValidarPago", "Financiero", new { id = p.CodigoPago })"
+                               class="btn btn-xs btn-warning">Validar</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

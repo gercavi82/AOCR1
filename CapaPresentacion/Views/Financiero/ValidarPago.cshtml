@@ -1,0 +1,91 @@
+﻿@model CapaModelo.Pago
+
+@{
+    ViewBag.Title = "Validar Pago";
+    Layout = "~/Views/Shared/_LayoutAOCR.cshtml";
+}
+
+<div class="container mt-4">
+    <h2><i class="glyphicon glyphicon-usd"></i> Detalle de Validación</h2>
+    <hr />
+
+    @if (Model == null)
+    {
+        <div class="alert alert-danger">Error: No se cargaron los datos del pago.</div>
+    }
+    else
+    {
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h3 class="panel-title">Datos del Comprobante</h3>
+            </div>
+            <div class="panel-body">
+                <dl class="dl-horizontal">
+                    <dt>Solicitud N°:</dt>
+                    <dd>@Model.CodigoSolicitud</dd>
+
+                    <dt>Monto Declarado:</dt>
+                    <dd><strong>$ @Model.Monto.ToString("N2")</strong></dd>
+
+                    <dt>Fecha de Pago:</dt>
+                    <dd>@(Model.FechaPago.HasValue ? Model.FechaPago.Value.ToString("dd/MM/yyyy") : "No registrada")</dd>
+
+                    <dt>Referencia/Transacción:</dt>
+                    <dd>@Model.NumeroTransaccion</dd>
+                </dl>
+            </div>
+        </div>
+
+        using (Html.BeginForm("ProcesarValidacion", "Financiero", FormMethod.Post, new { @class = "form-horizontal" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.CodigoPago)
+
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Acción Financiera</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">Confirmar Monto ($)</label>
+                        <div class="col-md-4">
+                            <input type="number" name="montoConfirmado" class="form-control" step="0.01"
+                                   value="@Model.Monto.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">Decisión</label>
+                        <div class="col-md-9">
+                            <label class="radio-inline">
+                                <input type="radio" name="aprobado" value="true" required /> <span class="text-success"><strong>Aprobar</strong></span>
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="aprobado" value="false" required /> <span class="text-danger"><strong>Rechazar</strong></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">Observaciones</label>
+                        <div class="col-md-9">
+                            <textarea name="observaciones" class="form-control" rows="4" placeholder="Escriba el motivo..." required></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-3 col-md-9">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="glyphicon glyphicon-save"></i> Procesar Validación
+                    </button>
+                    <a href="@Url.Action("ValidacionPagos", "Financiero")" class="btn btn-default btn-lg">
+                        Cancelar y Volver
+                    </a>
+                </div>
+            </div>
+        }
+
+    }
+</div>

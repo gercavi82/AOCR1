@@ -1,0 +1,164 @@
+﻿@inherits System.Web.Mvc.WebViewPage<CapaModelo.Inspeccion>
+@using System
+@using System.Linq
+@using System.Collections.Generic
+
+@{
+    ViewBag.Title = "Detalle Inspección";
+    Layout = "~/Views/Shared/_LayoutAOCR.cshtml";
+}
+
+<h2 class="mb-3">Detalle Inspección</h2>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <table class="table table-bordered mb-0">
+            <tr><th style="width:220px;">Código Inspección</th><td>@Model.CodigoInspeccion</td></tr>
+            <tr><th>Código Solicitud</th><td>@Model.CodigoSolicitud</td></tr>
+
+            <tr>
+                <th>Inspector Asignado (Código)</th>
+                <td>@(Model.CodigoInspector.HasValue ? Model.CodigoInspector.Value.ToString() : "No asignado")</td>
+            </tr>
+
+            <tr>
+                <th>Fecha Programada</th>
+                <td>@(Model.FechaProgramada.HasValue ? Model.FechaProgramada.Value.ToString("yyyy-MM-dd") : "-")</td>
+            </tr>
+
+            <tr>
+                <th>Estado</th>
+                <td>@(string.IsNullOrWhiteSpace(Model.Estado) ? "-" : Model.Estado)</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<h3 class="mt-4">Informe</h3>
+
+@if (!string.IsNullOrWhiteSpace(Model.RutaInforme))
+{
+    <div class="alert alert-success">
+        <a href="@Url.Content("~" + Model.RutaInforme)" target="_blank" rel="noopener">Ver Informe PDF</a>
+    </div>
+}
+else
+{
+    <div class="alert alert-light">Aún no hay informe cargado.</div>
+}
+
+@if (User.IsInRole("Inspector") || User.IsInRole("Administrador"))
+{
+    using (Html.BeginForm("SubirInforme", "Inspeccion", System.Web.Mvc.FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("id", Model.CodigoInspeccion)
+
+        <div class="mb-2">
+            <input type="file" name="Informe" class="form-control" accept="application/pdf" />
+            <small class="text-muted">Solo PDF.</small>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Subir Informe</button>
+    }
+}
+
+<hr class="my-4" />
+
+<h3>Hallazgos</h3>
+
+@if (User.IsInRole("Inspector") || User.IsInRole("Administrador"))
+{
+    <button class="btn btn-warning" type="button" data-bs-toggle="modal" data-bs-target="#modalHallazgo">
+        Registrar Hallazgo
+    </button>
+}
+
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>Severidad</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            // Si tu BL devuelve List<Hallazgo>, esto igual funciona por dynamic.
+            var hallazgos = ViewBag.Hallazgos as IEnumerable<dynamic>;
+        }
+
+        @if (hallazgos != null && hallazgos.Any())
+        {
+            foreach (var h in hallazgos)
+            {
+                <tr>
+                    <td>@h.Severidad</td>
+                    <td>@h.Descripcion</td>
+                    <td>@h.Estado</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3" class="text-center text-muted">Sin hallazgos registrados.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr class="my-4" />
+
+@if (User.IsInRole("JefaturaTecnica") || User.IsInRole("Administrador"))
+{
+    <h3>Cierre de Inspección</h3>
+
+    using (Html.BeginForm("Cerrar", "Inspeccion", System.Web.Mvc.FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("id", Model.CodigoInspeccion)
+
+        <div class="d-flex gap-2">
+            <button type="submit" name="resultado" value="APROBADO" class="btn btn-success">Aprobar</button>
+            <button type="submit" name="resultado" value="RECHAZADO" class="btn btn-danger">Rechazar</button>
+        </div>
+    }
+}
+
+<div class="modal fade" id="modalHallazgo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Registrar Hallazgo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                @using (Html.BeginForm("RegistrarHallazgo", "Inspeccion", System.Web.Mvc.FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.Hidden("CodigoInspeccion", Model.CodigoInspeccion)
+
+                    <div class="mb-2">
+                        <label class="form-label">Severidad</label>
+                        <select name="Severidad" class="form-select">
+                            <option value="ALTA">ALTA</option>
+                            <option value="MEDIA">MEDIA</option>
+                            <option value="BAJA">BAJA</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">Descripción</label>
+                        <textarea name="Descripcion" class="form-control" rows="3" required></textarea>
+                    </div>
+
+                    <input type="hidden" name="Estado" value="ABIERTO" />
+
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>

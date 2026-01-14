@@ -1,0 +1,56 @@
+﻿@model CapaModelo.SolicitudAOCR
+@{
+    ViewBag.Title = "Asignar Inspector";
+    Layout = "~/Views/Shared/_LayoutAOCR.cshtml";
+}
+
+<div class="container mt-4">
+    <h2><i class="glyphicon glyphicon-user"></i> Asignación de Inspectores</h2>
+    <hr />
+
+    @using (Html.BeginForm("AsignarInspector", "Tecnico", FormMethod.Post, new { @class = "form-horizontal" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.Hidden("solicitudId", Model.CodigoSolicitud)
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">Detalles de la Solicitud #@Model.CodigoSolicitud</div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-md-3 control-label">Inspector Principal</label>
+                    <div class="col-md-6">
+                        @Html.DropDownList("inspectorPrincipal", (SelectList)ViewBag.Inspectores, "-- Seleccione --", new { @class = "form-control", required = "required" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label">Inspector de Apoyo</label>
+                    <div class="col-md-6">
+                        @Html.DropDownList("inspectorApoyo", (SelectList)ViewBag.Inspectores, "-- Opcional --", new { @class = "form-control" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label">Fecha Inspección</label>
+                    <div class="col-md-4">
+                        <input type="date" name="fechaInspeccion" class="form-control" required value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-3 control-label">Observaciones</label>
+                    <div class="col-md-9">
+                        <textarea name="observaciones" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-3 col-md-9">
+                <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-ok"></i> Confirmar Asignación</button>
+                <a href="@Url.Action("Index")" class="btn btn-default">Cancelar</a>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,327 @@
+﻿@{
+    ViewBag.Title = "Operador";
+    Layout = "~/Views/Shared/_LayoutAOCR.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="@Url.Content("~/Content/css/dgac-theme.css")" />
+    <style>
+        body {
+            background-color: #f4f7fa;
+        }
+
+        .btn-white-perfect {
+            background: #fff;
+            color: var(--dgac-blue);
+            border: 1px solid #d1d5db;
+            font-weight: 700;
+            padding: 10px 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+            .btn-white-perfect:hover, .btn-white-perfect[aria-expanded="true"] {
+                border-color: var(--dgac-teal);
+                color: var(--dgac-teal);
+                box-shadow: 0 4px 12px rgba(12,124,134,.15);
+                transform: translateY(-1px);
+            }
+
+        .header-modern {
+            background: #fff;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #edf2f7;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-image: radial-gradient(#eef2f5 1px,transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .table-container-responsive {
+            max-height: 650px;
+            overflow-y: auto;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        .table-dgac thead th {
+            background-color: var(--dgac-blue);
+            color: #fff;
+            font-weight: 600;
+            font-size: .85rem;
+            border: none;
+            padding: 16px 12px;
+            white-space: nowrap;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table-dgac tbody td {
+            font-size: .9rem;
+            vertical-align: middle;
+            color: #555;
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .table-dgac tbody tr:hover {
+            background-color: #f8fbff;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: .85rem;
+            font-weight: 600;
+            color: #64748b;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+            .filter-tab.active, .filter-tab:hover {
+                background: var(--dgac-blue);
+                color: #fff;
+                border-color: var(--dgac-blue);
+                box-shadow: 0 4px 10px rgba(27,79,114,.2);
+            }
+
+        .badge-pill-custom {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: .75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .bg-aprobado {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .bg-pendiente {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .bg-tramite {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .bg-observado {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+}
+
+<div class="header-modern">
+    <div>
+        <h3 class="m-0 fw-bold text-dark">Tablero de Control</h3>
+        <p class="text-muted m-0 small">Gestión de Certificados AOCR</p>
+    </div>
+
+    <div class="btn-group">
+        <button type="button"
+                class="btn btn-white-perfect dropdown-toggle"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">
+            <i class="bi bi-plus-lg text-info"></i> NUEVA SOLICITUD
+        </button>
+
+        <div class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2" style="border-radius:12px; min-width:240px;">
+            <h6 class="dropdown-header text-uppercase fw-bold text-muted mb-1" style="font-size:.75rem;">Seleccione Trámite</h6>
+
+            <a id="btnEmisionAOCR" class="dropdown-item rounded py-2" href="#">
+                <i class="bi bi-file-earmark-plus text-primary me-2"></i> Emisión AOCR
+            </a>
+
+            <a class="dropdown-item rounded py-2" href="@Url.Action("Modificacion", "Operador")">
+                <i class="bi bi-pencil-square text-info me-2"></i> Modificación
+            </a>
+
+            <div class="dropdown-divider"></div>
+
+            <a class="dropdown-item rounded py-2" href="/Ambitos/Formulario_Actualizacion?oidSol=-1">
+                <i class="bi bi-arrow-repeat text-warning me-2"></i> Renovación
+            </a>
+        </div>
+    </div>
+</div>
+
+<section class="content pt-4 px-3">
+    <div class="container-fluid">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+            <div class="filter-tabs" id="filterContainer">
+                <div class="filter-tab active" data-filter="all">Todos</div>
+                <div class="filter-tab" data-filter="tramite"><i class="bi bi-hourglass-split me-1"></i> En Trámite</div>
+                <div class="filter-tab" data-filter="aprobado"><i class="bi bi-check-circle me-1"></i> Aprobados</div>
+                <div class="filter-tab" data-filter="observado"><i class="bi bi-exclamation-circle me-1"></i> Observados</div>
+            </div>
+
+            <div class="input-group shadow-sm" style="width: 320px; border-radius: 20px; overflow: hidden; background: white;">
+                <span class="input-group-text bg-white border-0 ps-3"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" id="searchInput" class="form-control border-0" placeholder="Buscar solicitud...">
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+            <div class="card-body p-0">
+                <div class="table-container-responsive">
+                    <table id="tablaSolicitudes" class="table table-dgac mb-0 text-nowrap w-100">
+                        <thead>
+                            <tr>
+                                <th style="width:60px;">ID</th>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th class="text-start ps-4">Compañía</th>
+                                <th class="text-start ps-4">Inspector</th>
+                                <th>Estado Global</th>
+                                <th class="text-end pe-4">Viáticos</th>
+                                <th style="width:80px;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpoTabla"></tbody>
+                    </table>
+
+                    <div id="noResults" class="text-center py-5 text-muted" style="display:none;">
+                        <i class="bi bi-search h3"></i>
+                        <p>No se encontraron resultados.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- Modal (el layout ya lo tiene; si lo tienes duplicado, deja SOLO UNO) -->
+<!-- Si tu Layout ya incluye #modalFormulario, NO lo repitas aquí -->
+
+@section scripts {
+    <script>
+    $(document).ready(function () {
+
+        // Datos simulados (luego lo cambias por AJAX a tu BD)
+        var datosGlobales = [
+            { id: 105, fecha: '19/11/2025', tipo: 'EMISIÓN', comp: 'LATAM AIRLINES', insp: 'Juan Pérez', st: 'Aprobado', cat: 'aprobado', viat: 80.00 },
+            { id: 104, fecha: '18/11/2025', tipo: 'RENOVACIÓN', comp: 'AVIANCA S.A.', insp: 'Sin Asignar', st: 'Pendiente', cat: 'tramite', viat: 0.00 },
+            { id: 103, fecha: '15/11/2025', tipo: 'MODIFICACIÓN', comp: 'AEROREGIONAL', insp: 'Maria López', st: 'En Proceso', cat: 'tramite', viat: 120.50 },
+            { id: 102, fecha: '12/11/2025', tipo: 'EMISIÓN', comp: 'KLM ROYAL', insp: '--', st: 'Observado', cat: 'observado', viat: 0.00 },
+            { id: 101, fecha: '10/11/2025', tipo: 'EMISIÓN', comp: 'AMERICAN AIRLINES', insp: 'R. Diaz', st: 'Finalizado', cat: 'aprobado', viat: 200.00 }
+        ];
+
+        renderTable(datosGlobales);
+
+        $('.filter-tab').click(function() {
+            $('.filter-tab').removeClass('active');
+            $(this).addClass('active');
+            filtrarDatos();
+        });
+
+        $('#searchInput').on('keyup', filtrarDatos);
+
+        function filtrarDatos() {
+            var filtro = $('.filter-tab.active').data('filter');
+            var texto = ($('#searchInput').val() || '').toLowerCase();
+
+            var resultados = datosGlobales.filter(function(item) {
+                var matchEstado = (filtro === 'all') || (item.cat === filtro);
+                var matchTexto = (item.comp || '').toLowerCase().includes(texto) || item.id.toString().includes(texto);
+                return matchEstado && matchTexto;
+            });
+
+            renderTable(resultados);
+        }
+
+        function renderTable(datos) {
+            if (!datos || datos.length === 0) {
+                $('#cuerpoTabla').empty();
+                $('#noResults').show();
+                return;
+            }
+            $('#noResults').hide();
+
+            var html = '';
+            $.each(datos, function (i, item) {
+                var badgeClass = 'bg-tramite';
+                if(item.cat === 'aprobado') badgeClass = 'bg-aprobado';
+                if(item.cat === 'observado') badgeClass = 'bg-observado';
+
+                html += `<tr>
+                    <td class="text-center fw-bold text-primary">${item.id}</td>
+                    <td class="text-center">${item.fecha}</td>
+                    <td class="text-center"><span class="badge text-bg-light border">${item.tipo}</span></td>
+                    <td class="text-start ps-4 fw-bold text-dark">${item.comp}</td>
+                    <td class="text-start ps-4 text-muted small">${item.insp}</td>
+                    <td class="text-center"><span class="badge-pill-custom ${badgeClass}">${item.st}</span></td>
+                    <td class="text-end pe-4 fw-bold" style="font-family:monospace;">$ ${Number(item.viat).toFixed(2)}</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-outline-secondary rounded-circle"
+                                onclick="consultarSolicitud(${item.id})"
+                                title="Ver Detalle"
+                                style="width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center;">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </td>
+                </tr>`;
+            });
+
+            $('#cuerpoTabla').html(html);
+        }
+
+        $('#btnEmisionAOCR').on('click', function (e) {
+            e.preventDefault();
+            cargarFormulario(null);
+        });
+
+        window.consultarSolicitud = function (id) {
+            cargarFormulario(id);
+        };
+
+        function cargarFormulario(idSolicitud) {
+            // Modal está en el Layout (BS5)
+            const modalEl = document.getElementById('modalFormulario');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+
+            $('#contenidoModal').html(`
+                <div class="d-flex flex-column align-items-center justify-content-center h-100 py-5">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <h6 class="text-secondary fw-bold">Cargando formulario...</h6>
+                </div>
+            `);
+
+            $.ajax({
+                url: '@Url.Action("FormularioEmisionAOCR", "SolicitudAOCR")',
+                type: 'GET',
+                data: { oid: idSolicitud },
+                success: function (data) {
+                    $('#contenidoModal').hide().html(data).fadeIn(200);
+                },
+                error: function (xhr) {
+                    $('#contenidoModal').html('<div class="alert alert-danger m-3">Error de conexión</div>');
+                    console.error(xhr.responseText);
+                }
+            });
+        }
+    });
+    </script>
+}

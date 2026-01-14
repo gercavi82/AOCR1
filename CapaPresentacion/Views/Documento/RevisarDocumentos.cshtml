@@ -1,0 +1,77 @@
+﻿@model List<CapaModelo.Documento>
+
+@{
+    ViewBag.Title = "Revisar Documentos Pendientes";
+    Layout = "~/Views/Shared/_LayoutAOCR.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary font-weight-bold">
+            <i class="fas fa-file-contract mr-2"></i> Documentos Pendientes de Revisión
+        </h2>
+        <a href="@Url.Action("RevisarDocumentos")" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-sync-alt"></i> Actualizar
+        </a>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger shadow-sm border-left-danger">
+            <i class="fas fa-exclamation-circle mr-2"></i> @TempData["Error"]
+        </div>
+    }
+
+    <div class="card shadow border-0">
+        <div class="card-body p-0">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="bg-primary text-white">
+                            <tr>
+                                <th><i class="fas fa-file-alt mr-1"></i> Nombre</th>
+                                <th><i class="fas fa-tag mr-1"></i> Tipo</th>
+                                <th><i class="fas fa-calendar-alt mr-1"></i> Fecha Subida</th>
+                                <th><i class="fas fa-user mr-1"></i> Solicitante</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var doc in Model)
+                            {
+                                <tr>
+                                    <td class="align-middle font-weight-bold">@doc.NombreArchivo</td>
+                                    <td class="align-middle"><span class="badge badge-info">@doc.TipoDocumento</span></td>
+                                    <td class="align-middle">@doc.FechaSubida?.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="align-middle">@doc.CreatedBy</td>
+                                    <td class="text-center align-middle">
+                                        <div class="btn-group" role="group">
+                                            <a href="@Url.Action("Detalle", "Documento", new { id = doc.CodigoDocumento })" class="btn btn-sm btn-outline-primary" title="Ver Detalle">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="@Url.Action("Descargar", "Documento", new { id = doc.CodigoDocumento })" class="btn btn-sm btn-outline-success" title="Descargar">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            <a href="@Url.Action("Editar", "Documento", new { id = doc.CodigoDocumento })" class="btn btn-sm btn-outline-warning" title="Editar / Revisar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">No hay documentos pendientes por revisar.</h5>
+                    <p class="text-secondary">¡Buen trabajo! Todo está al día.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

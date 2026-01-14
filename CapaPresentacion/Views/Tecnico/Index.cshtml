@@ -1,0 +1,45 @@
+﻿@model IEnumerable<CapaModelo.Tecnico>
+
+@{
+    ViewBag.Title = "Técnicos";
+    Layout = "~/Views/Shared/_LayoutAOCR.cshtml";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">
+        <i class="glyphicon glyphicon-wrench"></i> Técnicos
+    </h2>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:90px;">Código</th>
+                        <th>Especialidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var t in Model)
+                        {
+                            <tr>
+                                <td>@t.CodigoTecnico</td>
+                                <td>@t.Especialidad</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">No hay técnicos registrados.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
